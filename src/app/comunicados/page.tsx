@@ -78,7 +78,8 @@ export default function ComunicadosPage(){
   if(error)setError(error.message);else{setMessage(status==="archived"?"Comunicado arquivado.":"Comunicado publicado.");await load();}
   setBusy(false);
  }
- const tabs=[["mural","Mural"],["todos","Todos os comunicados"],...(isAdmin?[["gerenciar","Gerenciar"],["leituras","Leituras"]]:[])] as const;
+ const tabs:Array<[typeof tab,string]>=[["mural","Mural"],["todos","Todos os comunicados"]];
+ if(isAdmin)tabs.push(["gerenciar","Gerenciar"],["leituras","Leituras"]);
  return <main className="min-h-screen bg-[#050505] text-white"><div className="flex min-h-screen"><Sidebar/><section className="min-w-0 flex-1">
   <header className="border-b border-white/10 bg-black px-5 py-5"><p className="text-xs font-bold uppercase tracking-[.22em] text-[#FFD200]">Comunicação interna</p><div className="flex items-center justify-between gap-3"><h1 className="mt-1 text-2xl font-black">Comunicados</h1><span className="rounded-full border border-[#FFD200]/30 bg-[#FFD200]/10 px-3 py-1 text-xs font-bold text-[#FFD200]">{unread.length} não lido(s)</span></div><p className="mt-1 text-sm text-neutral-400">Informações oficiais, avisos e atualizações da academia.</p></header>
   <div className="mx-auto max-w-6xl space-y-5 p-4 pb-24 md:p-7">
