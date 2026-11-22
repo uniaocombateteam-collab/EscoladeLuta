@@ -35,8 +35,7 @@ export default function AgendaPage(){
    db.auth.getUser(),
    db.from("academy_schedule_slots").select("*").eq("active",true).order("weekday").order("start_time"),
    db.from("academy_schedule_exceptions").select("*").gte("exception_date",startKey).lte("exception_date",endKey),
-   db.from("academy_extra_class_requests").select("*").order("requested_date").order("start_time"),
-   db.from("profiles").select("id,role").limit(1)
+   db.from("academy_extra_class_requests").select("*").order("requested_date").order("start_time")
   ]);
   if(auth.error||!auth.data.user){setError("Não foi possível identificar sua sessão. Entre novamente.");setLoading(false);return;}
   const me=await db.from("profiles").select("id,role").eq("id",auth.data.user.id).single();
@@ -84,8 +83,7 @@ export default function AgendaPage(){
   setBusy(false);
  }
  function statusFor(slotId:string,date:string){return exceptions.find(x=>x.slot_id===slotId&&x.exception_date===date);}
- function dateLabel(d:Date){return d.toLocaleDateString("pt-BR",{weekday:"short"}).replace(".","");}
- return <main className="min-h-screen bg-[#050505] text-white"><div className="flex min-h-screen"><Sidebar/><section className="min-w-0 flex-1">
+  return <main className="min-h-screen bg-[#050505] text-white"><div className="flex min-h-screen"><Sidebar/><section className="min-w-0 flex-1">
   <header className="border-b border-white/10 bg-black px-5 py-5"><p className="text-xs font-bold uppercase tracking-[.22em] text-[#FFD200]">Organização da academia</p><h1 className="mt-1 text-2xl font-black">Agenda de aulas</h1><p className="mt-1 text-sm text-neutral-400">Programação semanal, solicitações e avisos de alterações.</p></header>
   <div className="mx-auto max-w-[1500px] space-y-5 p-4 pb-24 md:p-7">
    {notice&&<p className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-300">{notice}</p>}{error&&<p role="alert" className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">{error}</p>}
