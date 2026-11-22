@@ -5,7 +5,7 @@ import {createClient} from "@/lib/supabase/client";
 type Modality={id:string;name:string;active:boolean;teacher_commission_percent:number;image_url:string|null};
 const input="w-full rounded-lg border border-white/10 bg-[#0d0d11] px-3 py-3 text-sm text-white outline-none focus:border-[#FFD200]";
 export default function ModalitiesPage(){
- const db=useMemo(()=>createClient(),[]),[rows,setRows]=useState<Modality[]>([]),[name,setName]=useState(""),[commission,setCommission]=useState("50"),[editing,setEditing]=useState<string|null>(null),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
+ const db=useMemo(()=>createClient(),[]),[imageFile,setImageFile]=useState<File|null>(null),[imagePreview,setImagePreview]=useState<string|null>(null),[imageUrl,setImageUrl]=useState<string|null>(null),[clearImage,setClearImage]=useState(false),[rows,setRows]=useState<Modality[]>([]),[name,setName]=useState(""),[commission,setCommission]=useState("50"),[editing,setEditing]=useState<string|null>(null),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
  const load=useCallback(async()=>{setLoading(true);const{data,error}=await db.from("modalities").select("id,name,active,teacher_commission_percent,image_url").order("name");if(error)setError(error.message);else{setRows(data??[]);setError("");}setLoading(false);},[db]);
  useEffect(()=>{void load();},[load]);
  function reset(){setEditing(null);setName("");setCommission("50");setImageFile(null);setImagePreview(null);setImageUrl(null);setClearImage(false);}
