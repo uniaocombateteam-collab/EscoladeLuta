@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [busy, setBusy] = useState(false);
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault(); setBusy(true); setError("");
-    try { const db = createClient(); const { error } = await db.auth.signInWithPassword({ email, password }); if (error) throw error; const { data: { user } } = await db.auth.getUser(); const { data: profile } = await db.from("profiles").select("role").eq("id", user?.id ?? "").maybeSingle(); router.replace(profile?.role === "guardian" ? "/portal" : "/"); router.refresh(); }
+    try { const db = createClient(); const { error } = await db.auth.signInWithPassword({ email, password }); if (error) throw error; const { data: { user } } = await db.auth.getUser(); if (!user) throw new Error("Não foi possível identificar a conta."); const { data: assignments, error: rolesError } = await db.from("profile_roles").select("role").eq("profile_id", user.id); if (rolesError) throw rolesError; const roles = new Set((assignments ?? []).map((item) => item.role)); if (roles.has("guardian") && roles.has("student")) router.replace("/acesso"); else if (roles.has("guardian")) router.replace("/portal"); else if (roles.has("student")) router.replace("/aluno"); else router.replace("/"); router.refresh(); }
     catch (e) { setError(e instanceof Error ? e.message : "Falha no login."); }
     finally { setBusy(false); }
   }
