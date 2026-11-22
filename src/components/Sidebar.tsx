@@ -39,7 +39,7 @@ export default function Sidebar() {
     <>
       <aside className="hidden min-h-screen w-64 shrink-0 flex-col border-r border-white/10 bg-[#101014] md:flex">
         <div className="border-b border-white/10 px-6 py-7">
-          <b className="text-3xl italic text-[#d6ad55]">RM</b>
+          <img src="/logo-escola-rafael-mota.jpg" alt="Escola de Lutas Rafael Mota" className="h-24 w-full object-contain" />
           <p className="mt-1 text-xs tracking-[.18em]">ESCOLA DE LUTAS</p>
           <p className="text-[10px] tracking-[.28em] text-[#d6ad55]">RAFAEL MOTA</p>
         </div>
