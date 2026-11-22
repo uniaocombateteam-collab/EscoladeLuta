@@ -17,6 +17,10 @@ export default function TeachersPage(){
  const [query,setQuery]=useState("");
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
+ const [inviteOpen,setInviteOpen]=useState(false);
+ const [inviteName,setInviteName]=useState("");
+ const [inviteEmail,setInviteEmail]=useState("");
+ const [inviteBusy,setInviteBusy]=useState(false);
 
  const load=useCallback(async()=>{
   setLoading(true);setError("");
@@ -29,6 +33,15 @@ export default function TeachersPage(){
   setLoading(false);
  },[db]);
  useEffect(()=>{void load();},[load]);
+
+ async function inviteTeacher(e:React.FormEvent<HTMLFormElement>){
+  e.preventDefault();setInviteBusy(true);setError("");setNotice("");
+  const {data,error}=await db.functions.invoke("invite-teacher",{body:{full_name:inviteName.trim(),email:inviteEmail.trim()}});
+  if(error){setError(error.message);}
+  else if(data?.error){setError(data.error);}
+  else{setNotice(data?.message||"Convite enviado com sucesso.");setInviteOpen(false);setInviteName("");setInviteEmail("");await load();}
+  setInviteBusy(false);
+ }
 
  async function assign(classId:string,teacherId:string){
   setSaving(classId);setError("");setNotice("");
@@ -45,7 +58,7 @@ export default function TeachersPage(){
  return <main className="min-h-screen bg-[#09090b] text-white"><div className="flex min-h-screen"><Sidebar/><section className="min-w-0 flex-1">
   <header className="border-b border-white/10 bg-[#0d0d11] px-5 py-5"><p className="text-sm text-neutral-400">Administração / Equipe</p><h1 className="text-xl font-semibold">Professores</h1></header>
   <div className="mx-auto max-w-[1200px] space-y-6 p-5 pb-24 md:p-8 lg:pb-8">
-   <div><p className="text-xs uppercase tracking-[.2em] text-purple-300">Gestão de equipe</p><h2 className="mt-2 text-2xl font-semibold">Professores e responsabilidades</h2><p className="mt-1 max-w-2xl text-sm text-neutral-500">Consulte os professores com acesso ao sistema e defina quem responde por cada turma.</p></div>
+   <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs uppercase tracking-[.2em] text-purple-300">Gestão de equipe</p><h2 className="mt-2 text-2xl font-semibold">Professores e responsabilidades</h2><p className="mt-1 max-w-2xl text-sm text-neutral-500">Convide professores para acessar o sistema e defina quem responde por cada turma.</p></div><button onClick={()=>{setInviteOpen(true);setError("");setNotice("");}} className="rounded-lg bg-purple-700 px-5 py-3 text-sm font-semibold">＋ Convidar professor</button></div>
    {notice&&<p className="rounded-lg bg-emerald-500/10 p-3 text-sm text-emerald-300">{notice}</p>}
    {error&&<p role="alert" className="rounded-lg bg-red-500/10 p-3 text-sm text-red-300">{error}</p>}
    <div className="grid gap-3 sm:grid-cols-3">
@@ -64,5 +77,5 @@ export default function TeachersPage(){
    </section>
    <p className="text-xs leading-5 text-neutral-500">As permissões de acesso aos alunos e às informações financeiras serão aplicadas no banco de dados, por meio de políticas de segurança (RLS), antes de liberar o portal do professor.</p>
   </div>
- </section></div></main>;
+ </section></div>{inviteOpen&&<div className="fixed inset-0 z-40 flex items-center justify-center bg-black/80 p-3"><form onSubmit={inviteTeacher} className="w-full max-w-lg space-y-5 rounded-2xl border border-white/10 bg-[#17171d] p-6"><div className="flex items-start justify-between gap-4"><div><p className="text-xs uppercase tracking-widest text-purple-300">Acesso à equipe</p><h2 className="mt-2 text-xl font-semibold">Convidar professor</h2><p className="mt-1 text-sm text-neutral-400">O convite será enviado por e-mail. O professor definirá a senha ao ativar o acesso.</p></div><button type="button" onClick={()=>setInviteOpen(false)} className="text-2xl text-neutral-400">×</button></div><label className="block text-xs text-neutral-400">Nome completo<input required maxLength={120} value={inviteName} onChange={e=>setInviteName(e.target.value)} className={field+" mt-2"} placeholder="Nome do professor"/></label><label className="block text-xs text-neutral-400">E-mail<input required type="email" maxLength={254} value={inviteEmail} onChange={e=>setInviteEmail(e.target.value)} className={field+" mt-2"} placeholder="professor@exemplo.com"/></label><p className="text-xs leading-5 text-neutral-500">A conta será criada com perfil de professor. O acesso administrativo e os dados financeiros gerais não serão concedidos.</p><div className="flex justify-end gap-3 border-t border-white/10 pt-4"><button type="button" onClick={()=>setInviteOpen(false)} className="rounded-lg border border-white/10 px-4 py-2 text-sm">Cancelar</button><button disabled={inviteBusy} className="rounded-lg bg-purple-700 px-5 py-2 text-sm font-semibold disabled:opacity-50">{inviteBusy?"Enviando...":"Enviar convite"}</button></div></form></div>}</main>;
 }
