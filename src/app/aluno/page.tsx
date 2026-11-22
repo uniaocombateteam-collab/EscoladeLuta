@@ -86,7 +86,6 @@ export default function StudentPortalPage(){
  const visibleEntries=entries.filter(e=>financeFilter==="all"||e.status===financeFilter);
  const visibleAnnouncements=announcements.filter(a=>announcementFilter==="all"||(announcementFilter==="unread"?!readIds.includes(a.id):readIds.includes(a.id)));
  const nextSlots=[...slots].sort((a,b)=>a.weekday-b.weekday||a.start_time.localeCompare(b.start_time));
- const exceptionFor=(slotId:string,weekday:number)=>exceptions.find(e=>e.slot_id===slotId&&new Date(e.exception_date+"T12:00:00").getDay()===weekday);
  const nav=[["inicio","Início"],["rotina","Minha rotina"],["evolucao","Minha evolução"],["financeiro","Financeiro"],["comunicados","Comunicados"]];
  const jump=(id:string)=>{setActiveTab(id);document.getElementById(id)?.scrollIntoView({behavior:"smooth",block:"start"});};
  return <main className="min-h-screen bg-[#050505] text-white">
