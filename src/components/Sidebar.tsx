@@ -10,7 +10,7 @@ const items = [
   ["♟", "Professores", "/teachers"],
   ["◈", "Modalidades", "/modalities"],
   ["▦", "Turmas", "/classes"],
-  ["＄", "Financeiro", "#"],
+  ["＄", "Financeiro", "/finance"],
   ["◉", "Comunicados", "#"],
   ["▣", "Agenda", "#"],
   ["▤", "Relatórios", "#"],
