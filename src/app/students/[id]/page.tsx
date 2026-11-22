@@ -25,7 +25,7 @@ export default function StudentProfilePage(){
  const load=useCallback(async()=>{
   setLoading(true);setError("");
   const [s,n,a,h,l,m,cl,t]=await Promise.all([
-   supabase.from("students").select("id,full_name,birth_date,phone,email,enrollment_date,enrollment_status,plan_name,monthly_fee,class_label,photo_path,modalities(name),student_guardians(guardians(full_name,phone))").eq("id",id).single(),
+   supabase.from("students").select("id,full_name,birth_date,phone,email,enrollment_date,enrollment_status,plan_name,monthly_fee,class_label,class_id,modality_id,teacher_profile_id,photo_path,modalities(name),student_guardians(guardians(full_name,phone))").eq("id",id).single(),
    supabase.from("student_notes").select("id,body,created_at").eq("student_id",id).order("created_at",{ascending:false}),
    supabase.from("student_attendance").select("id,class_date,status,note").eq("student_id",id).order("class_date",{ascending:false}).limit(20),
    supabase.from("student_enrollment_history").select("id,old_status,new_status,changed_at").eq("student_id",id).order("changed_at",{ascending:false}),
