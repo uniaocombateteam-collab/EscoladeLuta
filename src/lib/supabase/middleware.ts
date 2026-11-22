@@ -20,11 +20,15 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const pathname = request.nextUrl.pathname;
   const login = pathname.startsWith("/login");
-  const publicHome = pathname === "/";
   const changePassword = pathname.startsWith("/change-password");
+  if (pathname === "/painel") {
+    const target = request.nextUrl.clone();
+    target.pathname = "/";
+    return NextResponse.redirect(target);
+  }
   const forceChange = data?.claims?.app_metadata && (data.claims.app_metadata as Record<string, unknown>).force_password_change === true;
 
-  if (!data?.claims && !login && !publicHome) {
+  if (!data?.claims && !login) {
     const target = request.nextUrl.clone();
     target.pathname = "/login";
     target.search = "";
@@ -44,7 +48,7 @@ export async function updateSession(request: NextRequest) {
   }
   if (data?.claims && !forceChange && (login || changePassword)) {
     const target = request.nextUrl.clone();
-    target.pathname = "/painel";
+    target.pathname = "/";
     target.search = "";
     return NextResponse.redirect(target);
   }
