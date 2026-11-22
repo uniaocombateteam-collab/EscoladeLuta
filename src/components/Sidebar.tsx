@@ -6,7 +6,7 @@ import { useState } from "react";
 const items = [
   ["⌂", "Início", "/"], ["♙", "Alunos", "/students"], ["♟", "Professores", "/teachers"],
   ["◈", "Modalidades", "/modalities"], ["▦", "Turmas", "/classes"], ["＄", "Financeiro", "/finance"],
-  ["◉", "Comunicados", "#"], ["▣", "Agenda", "#"], ["▤", "Relatórios", "#"],
+  ["◉", "Comunicados", "#"], ["▣", "Agenda", "/agenda"], ["▤", "Relatórios", "#"],
 ] as const;
 export default function Sidebar() {
   const pathname=usePathname(); const router=useRouter(); const [signingOut,setSigningOut]=useState(false);
