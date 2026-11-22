@@ -1,0 +1,29 @@
+# Sistema Escola de Lutas Rafael Mota
+
+Sistema administrativo e financeiro para gestão da Escola de Lutas Rafael Mota.
+
+## Objetivo
+
+Centralizar a administração da academia, incluindo:
+
+- Gestão de alunos e responsáveis
+- Cadastro de professores
+- Modalidades e turmas
+- Mensalidades e pagamentos
+- Controle financeiro
+- Comunicados e anúncios
+- Agenda de atividades
+- Portal do aluno e responsável
+
+## Tecnologias
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- Supabase
+- Vercel
+
+## Desenvolvimento
+
+Projeto em fase inicial de estruturação.
