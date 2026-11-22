@@ -71,7 +71,7 @@ export default function Sidebar() {
         {moreOpen && (
           <>
             <button type="button" aria-label="Fechar menu" className="fixed inset-0 bg-black/60" onClick={() => setMoreOpen(false)} />
-            <section className="absolute inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] rounded-2xl border border-white/10 bg-[#141414] p-3 shadow-2xl">
+            <section id="mobile-more-menu" className="absolute inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] rounded-2xl border border-white/10 bg-[#141414] p-3 shadow-2xl">
               <div className="mb-2 flex items-center justify-between px-2">
                 <p className="text-xs font-bold uppercase tracking-[.18em] text-neutral-400">Mais áreas</p>
                 <button type="button" onClick={() => setMoreOpen(false)} className="rounded-lg px-2 py-1 text-sm text-neutral-400">Fechar</button>
