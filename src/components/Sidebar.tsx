@@ -37,14 +37,14 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="hidden min-h-screen w-64 shrink-0 flex-col border-r border-white/10 bg-[#101014] md:flex">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-white/10 bg-[#101014] md:flex">
         <div className="border-b border-white/10 px-6 py-7">
           <img src="/logo-escola-rafael-mota.jpg" alt="Escola de Lutas Rafael Mota" className="h-24 w-full object-contain" />
           <p className="mt-1 text-xs tracking-[.18em]">ESCOLA DE LUTAS</p>
           <p className="text-[10px] tracking-[.28em] text-[#d6ad55]">RAFAEL MOTA</p>
         </div>
         <p className="px-5 pt-7 text-[10px] uppercase tracking-[.2em] text-neutral-500">Menu principal</p>
-        <nav className="mt-3 flex-1 space-y-1 px-3">
+        <nav className="mt-3 min-h-0 flex-1 space-y-1 overflow-y-auto px-3">
           {items.map(([icon, label, href]) => (
             <Link key={label} href={href} aria-current={pathname === href ? "page" : undefined}
               className={`flex gap-3 rounded-xl px-4 py-3 text-sm transition-colors ${pathname === href ? "bg-purple-800/70 text-white" : "text-neutral-400 hover:bg-white/5 hover:text-white"}`}>
