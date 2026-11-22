@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-type Student = { id:string; full_name:string; enrollment_status:string; plan_name:string|null; monthly_fee:number|null; class_label:string|null; modalities:{name:string}|null };
+type Student = { id:string; full_name:string; enrollment_status:string; plan_name:string|null; monthly_fee:number|null; class_label:string|null; modalities:{name:string}[]|null };
 type Modality = { id:string; name:string };
 type Banner = { id:string; title:string; description:string|null; image_url:string|null; button_label:string|null; button_target:string|null };
 type Slot = { id:string; title:string; modality_name:string; weekday:number; start_time:string; end_time:string; location:string|null };
@@ -57,7 +57,7 @@ export default function StudentPortalPage(){
  }
  const pending=entries.filter(e=>e.status==="pending").reduce((n,e)=>n+Number(e.amount),0);
  const paid=entries.filter(e=>e.status==="paid").reduce((n,e)=>n+Number(e.amount),0);
- const ownModality=student?.modalities?.name;
+ const ownModality=student?.modalities?.[0]?.name;
  const otherModalities=modalities.filter(m=>m.name!==ownModality);
  return <main className="min-h-screen bg-[#050505] text-white">
   <header className="sticky top-0 z-30 flex items-center justify-between border-b border-white/10 bg-[#090909]/95 px-4 py-4 backdrop-blur md:px-8">
@@ -104,7 +104,7 @@ export default function StudentPortalPage(){
    <section id="minha-area" className="scroll-mt-24">
     <div className="mb-5"><p className="text-xs font-black tracking-[.25em] text-[#FFD200]">SUA CONTA</p><h2 className="mt-2 text-3xl font-black">Minha área</h2></div>
     <div className="grid gap-4 md:grid-cols-3">
-     <article className="rounded-2xl border border-white/10 bg-[#111] p-5"><p className="text-xs text-neutral-500">MINHA MODALIDADE</p><h3 className="mt-2 text-xl font-black">{student?.modalities?.name||"A definir"}</h3><p className="mt-1 text-sm text-neutral-400">{student?.class_label||"Turma a definir"}</p></article>
+     <article className="rounded-2xl border border-white/10 bg-[#111] p-5"><p className="text-xs text-neutral-500">MINHA MODALIDADE</p><h3 className="mt-2 text-xl font-black">{student?.modalities?.[0]?.name||"A definir"}</h3><p className="mt-1 text-sm text-neutral-400">{student?.class_label||"Turma a definir"}</p></article>
      <article className="rounded-2xl border border-white/10 bg-[#111] p-5"><p className="text-xs text-neutral-500">MENSALIDADE</p><h3 className="mt-2 text-xl font-black">{student?.monthly_fee==null?"—":money(Number(student.monthly_fee))}</h3><p className="mt-1 text-sm text-neutral-400">Em aberto: {money(pending)}</p></article>
      <article className="rounded-2xl border border-white/10 bg-[#111] p-5"><p className="text-xs text-neutral-500">SITUAÇÃO DA MATRÍCULA</p><h3 className="mt-2 text-xl font-black">{student?.enrollment_status==="active"?"Ativa":student?.enrollment_status==="pending"?"Pendente":"Verificar"}</h3><p className="mt-1 text-sm text-neutral-400">Pagamentos registrados: {money(paid)}</p></article>
     </div>
