@@ -5,7 +5,7 @@ import {createClient} from "@/lib/supabase/client";
 
 type Role="admin"|"teacher"|"guardian";
 type Notice={id:string;title:string;content:string;category:string;priority:"normal"|"important"|"urgent";target_roles:Role[];status:"draft"|"published"|"archived";pinned:boolean;publish_at:string|null;expires_at:string|null;created_by:string;created_at:string};
-type ReadRow={announcement_id:string;profile_id:string;read_at:string};
+type ReadRow={announcement_id:string;profile_id:string;read_at:string};\ntype Attachment={id:string;file_name:string;file_path:string;mime_type:string};
 const input="w-full rounded-xl border border-white/10 bg-[#0b0b0b] px-3 py-3 text-sm text-white outline-none focus:border-[#FFD200]";
 const categories=["Todas","Geral","Administrativo","Treinamento","Eventos","Urgente","Professores"];
 const roles:Role[]=["admin","teacher","guardian"];
@@ -17,7 +17,7 @@ export default function ComunicadosPage(){
  const [role,setRole]=useState<Role|null>(null),[userId,setUserId]=useState("");
  const [rows,setRows]=useState<Notice[]>([]),[reads,setReads]=useState<ReadRow[]>([]),[readIds,setReadIds]=useState<string[]>([]);
  const [tab,setTab]=useState<"mural"|"todos"|"gerenciar"|"leituras">("mural"),[category,setCategory]=useState("Todas"),[search,setSearch]=useState("");
- const [selected,setSelected]=useState<Notice|null>(null),[editing,setEditing]=useState(false),[form,setForm]=useState(emptyForm);
+ const [selected,setSelected]=useState<Notice|null>(null),[editing,setEditing]=useState(false),[form,setForm]=useState(emptyForm);\n const [files,setFiles]=useState<File[]>([]),[attachments,setAttachments]=useState<Attachment[]>([]),[signedFiles,setSignedFiles]=useState<{name:string;url:string;type:string}[]>([]);
  const [loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(""),[message,setMessage]=useState("");
  const load=useCallback(async()=>{
   setLoading(true);setError("");
@@ -50,14 +50,25 @@ export default function ComunicadosPage(){
    if(!error)setReadIds(prev=>[...prev,n.id]);
   }
  }
- function startNew(){setForm(emptyForm);setSelected(null);setEditing(true);setTab("gerenciar");}
+ function startNew(){setForm(emptyForm);setFiles([]);setSelected(null);setEditing(true);setTab("gerenciar");}
  function startEdit(n:Notice){setForm({title:n.title,content:n.content,category:n.category,priority:n.priority,target_roles:n.target_roles,pinned:n.pinned,expires_at:n.expires_at?new Date(n.expires_at).toISOString().slice(0,16):""});setSelected(n);setEditing(true);}
  async function save(status:"draft"|"published",e?:FormEvent){
   e?.preventDefault();setBusy(true);setError("");setMessage("");
   if(!form.target_roles.length){setError("Selecione ao menos um público.");setBusy(false);return;}
+  if(files.some(file=>file.size>10*1024*1024)){setError("Cada anexo deve ter no máximo 10 MB.");setBusy(false);return;}
   const payload={title:form.title.trim(),content:form.content.trim(),category:form.category,priority:form.priority,target_roles:form.target_roles,pinned:form.pinned,status,publish_at:status==="published"?new Date().toISOString():null,expires_at:form.expires_at?new Date(form.expires_at).toISOString():null,created_by:userId,updated_at:new Date().toISOString()};
-  const result=selected?await db.from("academy_announcements").update(payload).eq("id",selected.id):await db.from("academy_announcements").insert(payload);
-  if(result.error)setError(result.error.message);else{setMessage(status==="published"?"Comunicado publicado.":"Rascunho salvo.");setEditing(false);setSelected(null);await load();}
+  const result=selected?await db.from("academy_announcements").update(payload).eq("id",selected.id).select("id").single():await db.from("academy_announcements").insert(payload).select("id").single();
+  if(result.error){setError(result.error.message);setBusy(false);return;}
+  const announcementId=result.data.id as string;
+  for(const file of files){
+   const safeName=file.name.normalize("NFKD").replace(/[^a-zA-Z0-9._-]/g,"_");
+   const path=announcementId+"/"+crypto.randomUUID()+"-"+safeName;
+   const upload=await db.storage.from("academy-announcements").upload(path,file,{contentType:file.type,upsert:false});
+   if(upload.error){setError("O comunicado foi salvo, mas um anexo falhou: "+upload.error.message);setBusy(false);return;}
+   const meta=await db.from("academy_announcement_attachments").insert({announcement_id:announcementId,file_name:file.name,file_path:path,mime_type:file.type,file_size:file.size,uploaded_by:userId});
+   if(meta.error){setError("Arquivo enviado, mas não foi possível registrar o anexo: "+meta.error.message);setBusy(false);return;}
+  }
+  setMessage(status==="published"?"Comunicado publicado.":"Rascunho salvo.");setEditing(false);setSelected(null);setFiles([]);await load();
   setBusy(false);
  }
  async function changeStatus(n:Notice,status:"published"|"archived"){
@@ -67,7 +78,7 @@ export default function ComunicadosPage(){
  }
  const tabs=[["mural","Mural"],["todos","Todos os comunicados"],...(isAdmin?[["gerenciar","Gerenciar"],["leituras","Leituras"]]:[])] as const;
  return <main className="min-h-screen bg-[#050505] text-white"><div className="flex min-h-screen"><Sidebar/><section className="min-w-0 flex-1">
-  <header className="border-b border-white/10 bg-black px-5 py-5"><p className="text-xs font-bold uppercase tracking-[.22em] text-[#FFD200]">Comunicação interna</p><h1 className="mt-1 text-2xl font-black">Comunicados</h1><p className="mt-1 text-sm text-neutral-400">Informações oficiais, avisos e atualizações da academia.</p></header>
+  <header className="border-b border-white/10 bg-black px-5 py-5"><p className="text-xs font-bold uppercase tracking-[.22em] text-[#FFD200]">Comunicação interna</p><div className="flex items-center justify-between gap-3"><h1 className="mt-1 text-2xl font-black">Comunicados</h1><span className="rounded-full border border-[#FFD200]/30 bg-[#FFD200]/10 px-3 py-1 text-xs font-bold text-[#FFD200]">{unread.length} não lido(s)</span></div><p className="mt-1 text-sm text-neutral-400">Informações oficiais, avisos e atualizações da academia.</p></header>
   <div className="mx-auto max-w-6xl space-y-5 p-4 pb-24 md:p-7">
    {message&&<p className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-300">{message}</p>}{error&&<p role="alert" className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">{error}</p>}
    <div className="grid grid-cols-2 gap-3 md:grid-cols-3"><div className="rounded-2xl border border-white/10 bg-[#101010] p-4"><p className="text-xs text-neutral-400">Publicados</p><p className="mt-1 text-2xl font-black">{visible.length}</p></div><div className="rounded-2xl border border-white/10 bg-[#101010] p-4"><p className="text-xs text-neutral-400">Não lidos</p><p className="mt-1 text-2xl font-black text-[#FFD200]">{unread.length}</p></div><div className="col-span-2 rounded-2xl border border-white/10 bg-[#101010] p-4 md:col-span-1"><p className="text-xs text-neutral-400">Avisos importantes</p><p className="mt-1 text-2xl font-black">{visible.filter(n=>n.priority!=="normal").length}</p></div></div>
@@ -87,6 +98,7 @@ export default function ComunicadosPage(){
       <div className="grid gap-3 sm:grid-cols-2"><label className="space-y-2 text-sm"><span className="block text-neutral-300">Categoria</span><select className={input} value={form.category} onChange={e=>setForm({...form,category:e.target.value})}>{categories.slice(1).map(c=><option key={c}>{c}</option>)}</select></label><label className="space-y-2 text-sm"><span className="block text-neutral-300">Prioridade</span><select className={input} value={form.priority} onChange={e=>setForm({...form,priority:e.target.value as typeof form.priority})}><option value="normal">Normal</option><option value="important">Importante</option><option value="urgent">Urgente</option></select></label></div>
       <div><p className="mb-2 text-sm text-neutral-300">Público destinatário</p><div className="flex flex-wrap gap-2">{roles.map(r=><label key={r} className="flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm"><input type="checkbox" checked={form.target_roles.includes(r)} onChange={e=>setForm({...form,target_roles:e.target.checked?[...form.target_roles,r]:form.target_roles.filter(x=>x!==r)})}/>{roleName[r]}</label>)}</div></div>
       <div className="grid gap-3 sm:grid-cols-2"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.pinned} onChange={e=>setForm({...form,pinned:e.target.checked})}/>Fixar no mural</label><label className="space-y-2 text-sm"><span className="block text-neutral-300">Validade (opcional)</span><input type="datetime-local" className={input} value={form.expires_at} onChange={e=>setForm({...form,expires_at:e.target.value})}/></label></div>
+      <div className="space-y-2"><label className="block text-sm text-neutral-300">Anexos (PDF ou imagem, até 10 MB cada)</label><input type="file" multiple accept="application/pdf,image/jpeg,image/png,image/webp" className={input} onChange={e=>setFiles(Array.from(e.target.files??[]))}/>{files.length>0&&<p className="text-xs text-neutral-400">{files.map(f=>f.name).join(" • ")}</p>}</div>
       <div className="flex flex-wrap justify-end gap-2 border-t border-white/10 pt-4"><button type="submit" disabled={busy} className="rounded-xl border border-white/20 px-4 py-3 text-sm font-bold">Salvar rascunho</button><button type="button" disabled={busy} onClick={()=>void save("published")} className="rounded-xl bg-[#FFD200] px-4 py-3 text-sm font-black text-black">{busy?"Salvando...":"Publicar agora"}</button></div>
      </form>}
     </div>}
@@ -94,6 +106,6 @@ export default function ComunicadosPage(){
    </>}
   </div>
  </section></div>
- {selected&&!editing&&tab!=="gerenciar"&&<div className="fixed inset-0 z-40 flex items-end justify-center bg-black/75 p-0 sm:items-center sm:p-5" onClick={()=>setSelected(null)}><article onClick={e=>e.stopPropagation()} className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl border border-white/10 bg-[#111] p-6 sm:rounded-3xl"><div className="flex items-center justify-between"><span className="text-xs font-bold uppercase tracking-wider text-[#FFD200]">{selected.category}</span><button onClick={()=>setSelected(null)} className="rounded-lg px-3 py-2 text-sm text-neutral-400">Fechar ✕</button></div><h2 className="mt-4 text-2xl font-black">{selected.title}</h2><div className="mt-2 text-xs text-neutral-500">{new Date(selected.publish_at||selected.created_at).toLocaleString("pt-BR")}</div><div className="mt-6 whitespace-pre-wrap text-sm leading-7 text-neutral-200">{selected.content}</div><p className="mt-8 border-t border-white/10 pt-4 text-xs text-emerald-300">✓ Leitura registrada nesta conta</p></article></div>}
+ {selected&&!editing&&tab!=="gerenciar"&&<div className="fixed inset-0 z-40 flex items-end justify-center bg-black/75 p-0 sm:items-center sm:p-5" onClick={()=>setSelected(null)}><article onClick={e=>e.stopPropagation()} className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl border border-white/10 bg-[#111] p-6 sm:rounded-3xl"><div className="flex items-center justify-between"><span className="text-xs font-bold uppercase tracking-wider text-[#FFD200]">{selected.category}</span><button onClick={()=>setSelected(null)} className="rounded-lg px-3 py-2 text-sm text-neutral-400">Fechar ✕</button></div><h2 className="mt-4 text-2xl font-black">{selected.title}</h2><div className="mt-2 text-xs text-neutral-500">{new Date(selected.publish_at||selected.created_at).toLocaleString("pt-BR")}</div><div className="mt-6 whitespace-pre-wrap text-sm leading-7 text-neutral-200">{selected.content}</div>{signedFiles.length>0&&<div className="mt-7 border-t border-white/10 pt-5"><h3 className="mb-3 text-sm font-bold">Anexos</h3><div className="space-y-2">{signedFiles.map(file=><a key={file.url} href={file.url} target="_blank" rel="noreferrer" className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm hover:border-[#FFD200]/50"><span className="truncate pr-3">{file.type==="application/pdf"?"📄":"🖼️"} {file.name}</span><span className="shrink-0 text-[#FFD200]">Abrir ↗</span></a>)}</div></div>}<p className="mt-8 border-t border-white/10 pt-4 text-xs text-emerald-300">✓ Leitura registrada nesta conta</p></article></div>}
  </main>;
 }
