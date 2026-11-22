@@ -37,41 +37,32 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-white/10 bg-[#101014] md:flex">
-        <div className="border-b border-white/10 px-6 py-7">
-          <img src="/logo-escola-rafael-mota.jpg" alt="Escola de Lutas Rafael Mota" className="h-24 w-full object-contain" />
-          <p className="mt-1 text-xs tracking-[.18em]">ESCOLA DE LUTAS</p>
-          <p className="text-[10px] tracking-[.28em] text-[#d6ad55]">RAFAEL MOTA</p>
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-white/10 bg-[#080808] md:flex">
+        <div className="border-b border-white/10 px-5 py-6">
+          <img src="/logo-escola-rafael-mota.svg" alt="Escola de Lutas Rafael Mota" className="mx-auto h-32 w-full object-contain" />
         </div>
-        <p className="px-5 pt-7 text-[10px] uppercase tracking-[.2em] text-neutral-500">Menu principal</p>
+        <p className="px-5 pt-7 text-[10px] font-bold uppercase tracking-[.2em] text-neutral-500">Menu principal</p>
         <nav className="mt-3 min-h-0 flex-1 space-y-1 overflow-y-auto px-3">
           {items.map(([icon, label, href]) => (
             <Link key={label} href={href} aria-current={pathname === href ? "page" : undefined}
-              className={`flex gap-3 rounded-xl px-4 py-3 text-sm transition-colors ${pathname === href ? "bg-purple-800/70 text-white" : "text-neutral-400 hover:bg-white/5 hover:text-white"}`}>
-              {icon} {label}
+              className={`flex gap-3 rounded-xl px-4 py-3 text-sm transition-colors ${pathname === href ? "bg-[#FFD200] font-bold text-black" : "text-neutral-300 hover:bg-white/5 hover:text-[#FFD200]"}`}>
+              <span className="w-4 text-center">{icon}</span>{label}
             </Link>
           ))}
         </nav>
         <div className="border-t border-white/10 p-3">
-          <button type="button" onClick={handleSignOut} disabled={signingOut}
-            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-neutral-400 transition-colors hover:bg-red-950/40 hover:text-red-300 disabled:opacity-50">
-            <span aria-hidden="true">↪</span>
-            {signingOut ? "Saindo..." : "Sair da conta"}
+          <button type="button" onClick={handleSignOut} disabled={signingOut} className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-white/5 hover:text-[#FFD200] disabled:opacity-50">
+            <span aria-hidden="true">↪</span>{signingOut ? "Saindo..." : "Sair da conta"}
           </button>
         </div>
       </aside>
-
-      <nav aria-label="Navegação principal" className="fixed inset-x-0 bottom-0 z-30 flex gap-1 overflow-x-auto border-t border-white/10 bg-[#101014]/95 p-2 backdrop-blur md:hidden">
+      <nav aria-label="Navegação principal" className="fixed inset-x-0 bottom-0 z-30 flex gap-1 overflow-x-auto border-t border-white/10 bg-[#080808]/95 p-2 backdrop-blur md:hidden">
         {items.map(([icon, label, href]) => (
-          <Link key={label} href={href} aria-current={pathname === href ? "page" : undefined}
-            className={`flex min-w-fit flex-col items-center gap-1 rounded-lg px-3 py-2 text-[10px] ${pathname === href ? "bg-purple-800/70 text-white" : "text-neutral-400"}`}>
+          <Link key={label} href={href} aria-current={pathname === href ? "page" : undefined} className={`flex min-w-fit flex-col items-center gap-1 rounded-lg px-3 py-2 text-[10px] ${pathname === href ? "bg-[#FFD200] text-black" : "text-neutral-300"}`}>
             <span className="text-base">{icon}</span>{label}
           </Link>
         ))}
-        <button type="button" onClick={handleSignOut} disabled={signingOut}
-          className="flex min-w-fit flex-col items-center gap-1 rounded-lg px-3 py-2 text-[10px] text-neutral-400 disabled:opacity-50">
-          <span className="text-base" aria-hidden="true">↪</span>{signingOut ? "Saindo..." : "Sair"}
-        </button>
+        <button type="button" onClick={handleSignOut} disabled={signingOut} className="flex min-w-fit flex-col items-center gap-1 rounded-lg px-3 py-2 text-[10px] text-neutral-300 disabled:opacity-50"><span className="text-base" aria-hidden="true">↪</span>{signingOut ? "Saindo..." : "Sair"}</button>
       </nav>
     </>
   );
