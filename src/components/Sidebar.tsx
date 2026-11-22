@@ -3,10 +3,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 const items = [
   ["⌂", "Início", "/"], ["♙", "Alunos", "/students"],
-  ["♟", "Professores", "/teachers"], ["◈", "Modalidades", "/modalities"],
-  ["▦", "Turmas", "/classes"], ["＄", "Financeiro", "/finance"],
-  ["◉", "Comunicados", "/announcements"], ["▣", "Agenda", "/calendar"],
-  ["▤", "Relatórios", "/reports"],
+  ["♟", "Professores", "#"], ["◈", "Modalidades", "#"],
+  ["▦", "Turmas", "#"], ["＄", "Financeiro", "#"],
+  ["◉", "Comunicados", "#"], ["▣", "Agenda", "#"],
+  ["▤", "Relatórios", "#"],
 ] as const;
 export default function Sidebar() {
   const pathname = usePathname();
