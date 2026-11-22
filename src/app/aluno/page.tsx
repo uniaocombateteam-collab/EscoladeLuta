@@ -41,7 +41,7 @@ export default function StudentPortalPage(){
   const {data:s,error:sError}=await db.from("students").select("id,full_name,enrollment_status,plan_name,monthly_fee,class_label,class_id,modality_id,profile_id,modalities(name,image_url)").eq("profile_id",user.id).maybeSingle();
   if(sError){setError("Não foi possível carregar sua matrícula: "+sError.message);setLoading(false);return;}
   if(!s){setError("Sua conta ainda não está vinculada a uma matrícula. Procure a administração.");setLoading(false);return;}
-  const current=s as unknown as Student;setStudent(current);
+  const current:Student={...s,modalities:Array.isArray(s.modalities)?s.modalities:s.modalities?[s.modalities]:null};setStudent(current);
   const [schedule,finance,attendanceRows,noticeRows,readRows]=await Promise.all([
    current.class_id
     ? db.from("academy_schedule_slots").select("id,title,modality_name,weekday,start_time,end_time,location,class_id").eq("active",true).eq("class_id",current.class_id).order("weekday").order("start_time")
