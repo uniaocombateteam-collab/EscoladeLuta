@@ -21,3 +21,5 @@ Crie o primeiro usuário em Supabase Auth > Users. Depois copie seu UUID e execu
 As políticas atuais restringem dados administrativos a usuários com role admin. Professores e responsáveis ainda não têm acesso às suas áreas. Não use dados reais até configurar o primeiro administrador e testar os acessos.
 
 Nunca exponha secret/service_role keys no navegador ou repositório.
+
+<!-- vercel-redeploy-trigger -->
