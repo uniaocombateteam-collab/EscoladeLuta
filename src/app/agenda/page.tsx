@@ -31,7 +31,7 @@ export default function AgendaPage(){
  const startKey=dateKey(week),endKey=dateKey(addDays(week,4));
  const load=useCallback(async()=>{
   setLoading(true);setError("");
-  const [auth,slotRes,exceptionRes,requestRes,profileRes]=await Promise.all([
+  const [auth,slotRes,exceptionRes,requestRes]=await Promise.all([
    db.auth.getUser(),
    db.from("academy_schedule_slots").select("*").eq("active",true).order("weekday").order("start_time"),
    db.from("academy_schedule_exceptions").select("*").gte("exception_date",startKey).lte("exception_date",endKey),
