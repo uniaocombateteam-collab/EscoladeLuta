@@ -29,8 +29,10 @@ export default function HomePage() {
               <div className="grid items-center gap-8 p-7 md:grid-cols-[1.1fr_.9fr] md:p-10">
                 <div>
                   <p className="text-xs font-bold tracking-[.28em] text-[#FFD200]">ESCOLA DE LUTAS RAFAEL MOTA</p>
-                  <h2 className="mt-4 max-w-2xl text-4xl font-black uppercase leading-[1.04] sm:text-5xl lg:text-6xl">Disciplina,<br/> técnica e <span className="text-[#FFD200]">evolução.</span></h2>
-                  <div className="mt-5 h-1 w-20 rounded-full bg-[#FFD200]" />
+                  <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-5" aria-label="Convênios aceitos">
+                    <span className="text-4xl font-black lowercase tracking-[-.06em] text-white sm:text-5xl">total<span className="text-[#FFD200]">pass</span></span>
+                    <span className="text-4xl font-extrabold tracking-[-.05em] text-white sm:text-5xl">well<span className="text-[#FFD200]">hub</span></span>
+                  </div>
                   <p className="mt-5 max-w-xl text-base leading-relaxed text-neutral-300">Artes marciais, esporte, cultura e formação pessoal em um só lugar. Bem-vindo ao ambiente de gestão da academia.</p>
                 </div>
                 <div className="flex min-h-64 items-center justify-center rounded-2xl border border-[#FFD200]/25 bg-black/45 p-8 text-center">
