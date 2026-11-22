@@ -19,20 +19,24 @@ export default function PortalPage(){
   setLoading(true);setError("");
   const {data:{user},error:userError}=await db.auth.getUser();
   if(userError||!user){router.replace("/login");return;}
-  const [profile,guardian,links,finance]=await Promise.all([
-   db.from("profiles").select("full_name,role").eq("id",user.id).single(),
+  const [profile,roles,guardian,links]=await Promise.all([
+   db.from("profiles").select("full_name").eq("id",user.id).single(),
+   db.from("profile_roles").select("role").eq("profile_id",user.id),
    db.from("guardians").select("id,full_name").eq("profile_id",user.id).maybeSingle(),
-   db.from("student_guardians").select("relationship,is_primary,students(id,full_name,birth_date,enrollment_status,plan_name,monthly_fee,class_label,modalities(name))"),
-   db.from("financial_entries").select("id,description,amount,due_date,status,direction,paid_at").eq("direction","income").order("due_date",{ascending:false}).limit(100)
+   db.from("student_guardians").select("relationship,is_primary,students(id,full_name,birth_date,enrollment_status,plan_name,monthly_fee,class_label,modalities(name))")
   ]);
-  if(profile.error||profile.data?.role!=="guardian"){router.replace("/");return;}
-  setName(profile.data.full_name||"Responsável");
-  if(guardian.error||links.error||finance.error){setError((guardian.error||links.error||finance.error)?.message||"Não foi possível carregar o portal.");setLoading(false);return;}
+  const isGuardian=(roles.data??[]).some((r:any)=>r.role==="guardian");
+  if(profile.error||roles.error||!isGuardian){router.replace("/");return;}
+  setName(profile.data?.full_name||"Responsável");
+  if(guardian.error||links.error){setError((guardian.error||links.error)?.message||"Não foi possível carregar o portal.");setLoading(false);return;}
   if(!guardian.data){setStudents([]);setEntries([]);setError("Seu acesso ainda não está vinculado a um cadastro de responsável. Entre em contato com a administração da academia.");setLoading(false);return;}
   const linked=(links.data??[]).map((x:any)=>x.students).filter(Boolean) as Student[];
   setStudents(linked);
-  const studentIds=new Set(linked.map(s=>s.id));
-  setEntries(((finance.data??[]) as Entry[]).filter(e=>studentIds.size>0));
+  const studentIds=linked.map(s=>s.id);
+  if(studentIds.length===0){setEntries([]);setLoading(false);return;}
+  const finance=await db.from("financial_entries").select("id,description,amount,due_date,status,direction,paid_at").eq("direction","income").in("student_id",studentIds).order("due_date",{ascending:false}).limit(100);
+  if(finance.error){setError(finance.error.message);setLoading(false);return;}
+  setEntries((finance.data??[]) as Entry[]);
   setLoading(false);
  },[db,router]);
  useEffect(()=>{void load();},[load]);
