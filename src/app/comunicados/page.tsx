@@ -3,16 +3,16 @@ import {FormEvent,useCallback,useEffect,useMemo,useState} from "react";
 import Sidebar from "@/components/Sidebar";
 import {createClient} from "@/lib/supabase/client";
 
-type Role="admin"|"teacher"|"guardian";
+type Role="admin"|"teacher"|"guardian"|"student";
 type Notice={id:string;title:string;content:string;category:string;priority:"normal"|"important"|"urgent";target_roles:Role[];status:"draft"|"published"|"archived";pinned:boolean;publish_at:string|null;expires_at:string|null;created_by:string;created_at:string};
 type ReadRow={announcement_id:string;profile_id:string;read_at:string};
 type Attachment={id:string;file_name:string;file_path:string;mime_type:string};
 const input="w-full rounded-xl border border-white/10 bg-[#0b0b0b] px-3 py-3 text-sm text-white outline-none focus:border-[#FFD200]";
 const categories=["Todas","Geral","Administrativo","Treinamento","Eventos","Urgente","Professores"];
-const roles:Role[]=["admin","teacher","guardian"];
-const roleName:Record<Role,string>={admin:"Administração",teacher:"Professores",guardian:"Responsáveis"};
+const roles:Role[]=["admin","teacher","guardian","student"];
+const roleName:Record<Role,string>={admin:"Administração",teacher:"Professores",guardian:"Responsáveis",student:"Alunos"};
 const priorityName={normal:"Normal",important:"Importante",urgent:"Urgente"};
-const emptyForm={title:"",content:"",category:"Geral",priority:"normal" as "normal"|"important"|"urgent",target_roles:["admin","teacher","guardian"] as Role[],pinned:false,expires_at:""};
+const emptyForm={title:"",content:"",category:"Geral",priority:"normal" as "normal"|"important"|"urgent",target_roles:["admin","teacher","guardian","student"] as Role[],pinned:false,expires_at:""};
 export default function ComunicadosPage(){
  const db=useMemo(()=>createClient(),[]);
  const [role,setRole]=useState<Role|null>(null),[userId,setUserId]=useState("");
