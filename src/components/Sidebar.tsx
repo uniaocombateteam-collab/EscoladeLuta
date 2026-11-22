@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
 
 const items = [
-  ["⌂", "Início", "/"],
+  ["⌂", "Painel", "/painel"],
   ["♙", "Alunos", "/students"],
   ["♟", "Professores", "/teachers"],
   ["◈", "Modalidades", "/modalities"],
