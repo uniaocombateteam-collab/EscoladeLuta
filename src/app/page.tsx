@@ -25,7 +25,7 @@ export default function PublicHome() {
       <header className="sticky top-0 z-30 border-b border-white/10 bg-[#09090d]/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
           <Link href="/" className="flex items-center gap-3">
-            <span className="grid h-11 w-11 place-items-center rounded-xl border border-purple-400/40 bg-purple-950 text-xl font-black text-purple-200">RM</span>
+            <img src="/logo-escola-rafael-mota.jpg" alt="Escola de Lutas Rafael Mota" className="h-14 w-20 rounded-lg object-contain" />
             <span><b className="block text-sm tracking-wide">ESCOLA DE LUTAS</b><span className="text-[10px] tracking-[.24em] text-amber-300">RAFAEL MOTA</span></span>
           </Link>
           <nav className="hidden items-center gap-7 text-sm text-neutral-300 lg:flex">
