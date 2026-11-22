@@ -21,12 +21,16 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const login = pathname.startsWith("/login");
   const changePassword = pathname.startsWith("/change-password");
+
   if (pathname === "/painel") {
     const target = request.nextUrl.clone();
     target.pathname = "/";
     return NextResponse.redirect(target);
   }
-  const forceChange = data?.claims?.app_metadata && (data.claims.app_metadata as Record<string, unknown>).force_password_change === true;
+
+  const forceChange =
+    data?.claims?.app_metadata &&
+    (data.claims.app_metadata as Record<string, unknown>).force_password_change === true;
 
   if (!data?.claims && !login) {
     const target = request.nextUrl.clone();
@@ -52,5 +56,48 @@ export async function updateSession(request: NextRequest) {
     target.search = "";
     return NextResponse.redirect(target);
   }
+
+  // Modalidades é uma área administrativa: autenticação, sozinha, não concede acesso.
+  if (data?.claims && pathname.startsWith("/modalities")) {
+    const userId = typeof data.claims.sub === "string" ? data.claims.sub : null;
+    let roles: string[] = [];
+    let roleLookupFailed = !userId;
+
+    if (userId) {
+      const { data: assignments, error: rolesError } = await supabase
+        .from("profile_roles")
+        .select("role")
+        .eq("profile_id", userId);
+
+      if (rolesError) {
+        roleLookupFailed = true;
+      } else {
+        roles = (assignments ?? []).map((item) => item.role);
+        if (roles.length === 0) {
+          const { data: profile, error: profileError } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", userId)
+            .maybeSingle();
+          if (profileError) roleLookupFailed = true;
+          else if (profile?.role) roles = [profile.role];
+        }
+      }
+    }
+
+    if (roleLookupFailed || !roles.includes("admin")) {
+      const target = request.nextUrl.clone();
+      target.pathname = roles.includes("guardian")
+        ? "/portal"
+        : roles.includes("student")
+          ? "/aluno"
+          : "/";
+      target.search = "";
+      const redirect = NextResponse.redirect(target);
+      response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+      return redirect;
+    }
+  }
+
   return response;
 }
