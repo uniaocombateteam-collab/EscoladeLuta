@@ -5,6 +5,9 @@ Sistema administrativo e financeiro da academia.
 ## Stack
 Next.js 15, React 19, TypeScript, Tailwind CSS e Supabase (PostgreSQL, Auth e RLS).
 
+## Publicação
+A branch `setup/initial-foundation` é usada para validar previews na Vercel antes de promover alterações para `main`.
+
 ## Desenvolvimento local
 1. Node.js 20.9+
 2. `npm install`
