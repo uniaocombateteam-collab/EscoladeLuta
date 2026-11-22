@@ -1,6 +1,7 @@
 "use client";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -32,6 +33,7 @@ export default function LoginPage() {
           {error&&<p role="alert" className="mt-4 text-sm text-red-300">{error}</p>}
           <button disabled={busy} className="mt-7 w-full rounded-xl bg-[#FFD200] p-3.5 text-sm font-black text-black transition hover:bg-[#ffe04a] disabled:opacity-50">{busy?"Entrando...":"Entrar"}</button>
           <p className="mt-6 text-center text-xs text-neutral-500">Acesso destinado a usuários cadastrados pela administração.</p>
+          <p className="mt-4 text-center text-xs text-neutral-400">Ainda não conhece a academia? <Link href="/conheca" className="font-semibold text-[#FFD200] hover:underline">Conheça nossas modalidades</Link></p>
         </form></div>
       </div>
     </main>
