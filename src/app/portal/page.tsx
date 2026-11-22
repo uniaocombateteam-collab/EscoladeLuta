@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import Sidebar from "@/components/Sidebar";
 import { createClient } from "@/lib/supabase/client";
 
 type Student = { id:string; full_name:string; birth_date:string|null; enrollment_status:string; plan_name:string|null; monthly_fee:number|null; class_label:string|null; modalities:{name:string}|null };
@@ -40,7 +39,7 @@ export default function PortalPage(){
  const pending=entries.filter(e=>e.status==="pending").reduce((n,e)=>n+Number(e.amount),0);
  const paid=entries.filter(e=>e.status==="paid").reduce((n,e)=>n+Number(e.amount),0);
  async function logout(){await db.auth.signOut();router.replace("/login");router.refresh();}
- return <main className="min-h-screen bg-[#050505] text-white"><div className="flex min-h-screen"><Sidebar/><section className="min-w-0 flex-1">
+ return <main className="min-h-screen bg-[#050505] text-white"><div className="min-h-screen"><section className="min-w-0">
   <header className="flex items-center justify-between border-b border-white/10 bg-[#0b0b0b] px-5 py-5"><div><p className="text-xs font-bold uppercase tracking-[.2em] text-[#FFD200]">Área do responsável</p><h1 className="mt-1 text-xl font-bold">Meu portal</h1></div><button onClick={logout} className="rounded-lg border border-white/15 px-3 py-2 text-xs text-neutral-300 hover:border-[#FFD200]">Sair</button></header>
   <div className="mx-auto max-w-6xl space-y-6 p-5 pb-24 md:p-8 lg:pb-8">
    <section className="rounded-3xl border border-[#FFD200]/20 bg-[radial-gradient(ellipse_at_80%_20%,rgba(255,210,0,.12),transparent_45%),#111] p-7"><p className="text-xs font-bold uppercase tracking-[.2em] text-[#FFD200]">Escola de Lutas Rafael Mota</p><h2 className="mt-3 text-3xl font-black">Olá, {name.split(" ")[0]}.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-400">Acompanhe os dados dos alunos vinculados à sua responsabilidade, consulte informações de matrícula e visualize os lançamentos financeiros.</p></section>
