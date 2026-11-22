@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Sidebar from "@/components/Sidebar";
 
 const modalities = [
   { name: "Jiu-Jitsu", detail: "Técnica, estratégia e evolução no tatame", icon: "🥋" },
@@ -21,20 +21,15 @@ const gallery = [
 
 export default function PublicHome() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[#08080b] text-white">
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-[#09090d]/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
-          <Link href="/" className="flex items-center gap-3">
-            <img src="/logo-escola-rafael-mota.jpg" alt="Escola de Lutas Rafael Mota" className="h-14 w-20 rounded-lg object-contain" />
-            <span><b className="block text-sm tracking-wide">ESCOLA DE LUTAS</b><span className="text-[10px] tracking-[.24em] text-amber-300">RAFAEL MOTA</span></span>
-          </Link>
-          <nav className="hidden items-center gap-7 text-sm text-neutral-300 lg:flex">
-            <a href="#inicio" className="hover:text-white">Início</a><a href="#modalidades" className="hover:text-white">Modalidades</a><a href="#planos" className="hover:text-white">Planos</a><a href="#agenda" className="hover:text-white">Agenda e novidades</a><a href="#academia" className="hover:text-white">A academia</a>
-          </nav>
-          <Link href="/login" className="rounded-xl bg-purple-700 px-4 py-2.5 text-sm font-semibold hover:bg-purple-600">Área do aluno</Link>
-        </div>
-      </header>
-
+    <main className="min-h-screen bg-[#08080b] text-white">
+      <div className="flex min-h-screen">
+        <Sidebar />
+        <section className="min-w-0 flex-1">
+          <header className="sticky top-0 z-20 flex items-center justify-between border-b border-white/10 bg-[#09090d]/95 px-5 py-4 backdrop-blur">
+            <div><p className="text-xs uppercase tracking-[.2em] text-purple-300">Escola de Lutas Rafael Mota</p><h1 className="text-xl font-semibold">Início</h1></div>
+            <span className="hidden text-xs text-neutral-500 sm:block">Mural e informações da academia</span>
+          </header>
+          <div className="overflow-hidden">
       <section id="inicio" className="relative border-b border-white/10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_40%,rgba(126,34,206,.25),transparent_42%),linear-gradient(115deg,#09090b_15%,#17121e_62%,#09090b)]" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-5 py-20 md:grid-cols-[1.05fr_.95fr] md:py-28">
@@ -79,7 +74,10 @@ export default function PublicHome() {
         <div className="mx-auto grid max-w-7xl gap-8 px-5 py-16 md:grid-cols-2 md:items-center"><div><p className="text-xs font-semibold tracking-[.25em] text-purple-300">NOSSA ESCOLA</p><h2 className="mt-2 text-3xl font-bold">Treinar. Aprender. Evoluir.</h2></div><p className="text-base leading-relaxed text-neutral-300">A Escola de Lutas Rafael Mota reúne modalidades de luta e práticas corporais em um ambiente de disciplina, respeito e desenvolvimento. Aqui, cada aluno constrói sua própria trajetória, com orientação e dedicação.</p></div>
       </section>
 
-      <footer className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-8 text-sm text-neutral-400 sm:flex-row sm:items-center sm:justify-between"><div><b className="text-white">Escola de Lutas Rafael Mota</b><p className="mt-1 text-xs">Disciplina, técnica e evolução.</p></div><div className="flex flex-wrap gap-5"><a href="#modalidades" className="hover:text-white">Modalidades</a><a href="#agenda" className="hover:text-white">Agenda</a><Link href="/login" className="hover:text-white">Área do aluno</Link></div><p className="text-xs">© {new Date().getFullYear()} Escola de Lutas Rafael Mota</p></footer>
+      <footer className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-8 text-sm text-neutral-400 sm:flex-row sm:items-center sm:justify-between"><div><b className="text-white">Escola de Lutas Rafael Mota</b><p className="mt-1 text-xs">Disciplina, técnica e evolução.</p></div><div className="flex flex-wrap gap-5"><a href="#modalidades" className="hover:text-white">Modalidades</a><a href="#agenda" className="hover:text-white">Agenda</a><a href="#agenda" className="hover:text-white">Novidades</a></div><p className="text-xs">© {new Date().getFullYear()} Escola de Lutas Rafael Mota</p></footer>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
