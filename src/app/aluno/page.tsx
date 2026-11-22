@@ -4,8 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-type Student = { id:string; full_name:string; enrollment_status:string; plan_name:string|null; monthly_fee:number|null; class_label:string|null; modalities:{name:string}[]|null };
-type Modality = { id:string; name:string };
+type Student = { id:string; full_name:string; enrollment_status:string; plan_name:string|null; monthly_fee:number|null; class_label:string|null; modalities:{name:string;image_url:string|null}[]|null };
+type Modality = { id:string; name:string; image_url:string|null };
 type Banner = { id:string; title:string; description:string|null; image_url:string|null; button_label:string|null; button_target:string|null };
 type Slot = { id:string; title:string; modality_name:string; weekday:number; start_time:string; end_time:string; location:string|null };
 type Entry = { id:string; description:string; amount:number; due_date:string|null; status:string };
@@ -28,12 +28,12 @@ export default function StudentPortalPage(){
   if(userError||!user){router.replace("/login");return;}
   const {data:roles,error:roleError}=await db.from("profile_roles").select("role").eq("profile_id",user.id);
   if(roleError||!(roles??[]).some((r:any)=>r.role==="student")){router.replace("/");return;}
-  const {data:s,error:sError}=await db.from("students").select("id,full_name,enrollment_status,plan_name,monthly_fee,class_label,modalities(name)").eq("profile_id",user.id).maybeSingle();
+  const {data:s,error:sError}=await db.from("students").select("id,full_name,enrollment_status,plan_name,monthly_fee,class_label,modalities(name,image_url)").eq("profile_id",user.id).maybeSingle();
   if(sError){setError("Não foi possível carregar sua matrícula: "+sError.message);setLoading(false);return;}
   if(!s){setError("Sua conta ainda não está vinculada a uma matrícula. Procure a administração.");setLoading(false);return;}
   setStudent(s as Student);
   const [mods,bannerRows,schedule,finance]=await Promise.all([
-   db.from("modalities").select("id,name").eq("active",true).order("name"),
+   db.from("modalities").select("id,name,image_url").eq("active",true).order("name"),
    db.from("academy_portal_banners").select("id,title,description,image_url,button_label,button_target").eq("active",true).order("sort_order"),
    db.from("academy_schedule_slots").select("id,title,modality_name,weekday,start_time,end_time,location").eq("active",true).order("weekday").order("start_time"),
    db.from("financial_entries").select("id,description,amount,due_date,status").eq("student_id",s.id).eq("direction","income").order("due_date",{ascending:false}).limit(50)
@@ -88,7 +88,7 @@ export default function StudentPortalPage(){
     <div className="mb-6 flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-black tracking-[.25em] text-[#FFD200]">DESCUBRA</p><h2 className="mt-2 text-3xl font-black md:text-4xl">Nossas modalidades</h2><p className="mt-2 text-sm text-neutral-400">Explore outras práticas e encontre seu próximo desafio.</p></div><span className="text-xs text-neutral-500">Valores mensais de referência</span></div>
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
      {modalities.map((m,i)=>{const active=m.name===ownModality;const amount=prices[m.name];return <article key={m.id} className={"overflow-hidden rounded-2xl border bg-[#111] "+(active?"border-[#FFD200]/50":"border-white/10")}>
-      <div className={"flex h-32 items-end bg-[radial-gradient(ellipse_at_70%_10%,rgba(255,210,0,.2),transparent_50%),linear-gradient(135deg,#252525,#0c0c0c)] p-5"}><span className="text-xs font-black uppercase tracking-[.2em] text-[#FFD200]">{["01","02","03","04"][i%4]} / TREINAMENTO</span></div>
+      <div className="relative flex h-36 items-end overflow-hidden bg-[linear-gradient(135deg,#252525,#0c0c0c)] p-5">{m.image_url&&<img src={m.image_url} alt={m.name} className="absolute inset-0 h-full w-full object-cover opacity-80"/>}<div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"/><span className="relative className="text-xs font-black uppercase tracking-[.2em] text-[#FFD200]">{["01","02","03","04"][i%4]} / TREINAMENTO</span></div>
       <div className="p-5"><div className="flex items-start justify-between gap-2"><h3 className="text-xl font-black">{m.name}</h3>{active&&<span className="rounded-full bg-[#FFD200]/10 px-2 py-1 text-[10px] font-bold text-[#FFD200]">Sua modalidade</span>}</div><p className="mt-2 text-sm text-neutral-400">{active?"Você já faz parte desta modalidade. Continue evoluindo!":"Conheça a modalidade, consulte os horários e experimente uma aula."}</p><p className="mt-4 text-lg font-black">{amount?money(amount):"Consulte a administração"}<span className="text-xs font-normal text-neutral-500"> / mês</span></p>
        {!active&&<button onClick={()=>{setChosen(m.id);setModalOpen(true);}} className="mt-4 w-full rounded-xl border border-[#FFD200]/50 px-4 py-3 text-sm font-bold text-[#FFD200] hover:bg-[#FFD200] hover:text-black">Solicitar aula experimental</button>}
       </div>
