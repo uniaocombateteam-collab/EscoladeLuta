@@ -2,7 +2,7 @@
 import Link from "next/link";
 import {usePathname} from "next/navigation";
 const items=[
- ["⌂","Início","/"],["♙","Alunos","/students"],["♟","Professores","#"],
+ ["⌂","Início","/"],["♙","Alunos","/students"],["♟","Professores","/teachers"],
  ["◈","Modalidades","/modalities"],["▦","Turmas","/classes"],["＄","Financeiro","#"],
  ["◉","Comunicados","#"],["▣","Agenda","#"],["▤","Relatórios","#"],
 ] as const;
