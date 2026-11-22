@@ -24,22 +24,24 @@ export default function StudentProfilePage(){
  const [form,setForm]=useState({full_name:"",birth_date:"",phone:"",email:"",enrollment_date:"",enrollment_status:"active",plan_name:"",monthly_fee:"",modality_id:"",class_id:""});
  const load=useCallback(async()=>{
   setLoading(true);setError("");
-  const [s,n,a,h,l,m,cl]=await Promise.all([
+  const [s,n,a,h,l,m,cl,t]=await Promise.all([
    supabase.from("students").select("id,full_name,birth_date,phone,email,enrollment_date,enrollment_status,plan_name,monthly_fee,class_label,photo_path,modalities(name),student_guardians(guardians(full_name,phone))").eq("id",id).single(),
    supabase.from("student_notes").select("id,body,created_at").eq("student_id",id).order("created_at",{ascending:false}),
    supabase.from("student_attendance").select("id,class_date,status,note").eq("student_id",id).order("class_date",{ascending:false}).limit(20),
    supabase.from("student_enrollment_history").select("id,old_status,new_status,changed_at").eq("student_id",id).order("changed_at",{ascending:false}),
    supabase.from("student_audit_log").select("id,action,changed_at,old_data,new_data").eq("student_id",id).order("changed_at",{ascending:false}).limit(20),
    supabase.from("modalities").select("id,name").eq("active",true).order("name"),
-   supabase.from("classes").select("id,name,schedule,modality_id,teacher_profile_id").eq("active",true).order("name")
+   supabase.from("classes").select("id,name,schedule,modality_id,teacher_profile_id").eq("active",true).order("name"),
+   supabase.from("profiles").select("id,full_name").eq("role","teacher")
   ]);
   if(s.error){setError(s.error.message);setStudent(null);}else{
    const x=s.data as unknown as Student;setStudent(x);
    setForm({full_name:x.full_name??"",birth_date:x.birth_date??"",phone:x.phone??"",email:x.email??"",enrollment_date:x.enrollment_date??"",enrollment_status:x.enrollment_status??"active",plan_name:x.plan_name??"",monthly_fee:x.monthly_fee==null?"":String(x.monthly_fee),modality_id:x.modality_id??"",class_id:x.class_id??""});
    if(x.photo_path){const {data}=await supabase.storage.from("student-photos").createSignedUrl(x.photo_path,3600);setPhotoUrl(data?.signedUrl??"");}else setPhotoUrl("");
   }
-  if(n.error||a.error||h.error||l.error||m.error||cl.error){setError(v=>v||n.error?.message||a.error?.message||h.error?.message||l.error?.message||m.error?.message||cl.error?.message||"Falha ao carregar informações complementares.");}
-  setModalities(m.data??[]);setClasses((cl.data??[]) as ClassRow[]);
+  if(n.error||a.error||h.error||l.error||m.error||cl.error||t.error){setError(v=>v||n.error?.message||a.error?.message||h.error?.message||l.error?.message||m.error?.message||cl.error?.message||t.error?.message||"Falha ao carregar informações complementares.");}
+  const teacherNames=new Map((t.data??[]).map(p=>[p.id,p.full_name]));
+  setModalities(m.data??[]);setClasses((cl.data??[]).map(row=>({...row,teacher_name:teacherNames.get(row.teacher_profile_id)||null})));
   setNotes(n.data??[]);setAttendance(a.data??[]);setHistory(h.data??[]);setAudit(l.data??[]);
   setLoading(false);
  },[supabase,id]);
@@ -50,7 +52,7 @@ export default function StudentProfilePage(){
  async function save(e:FormEvent<HTMLFormElement>){e.preventDefault();setSaving(true);setError("");setNotice("");
   const selectedClass=classes.find(c=>c.id===form.class_id);
   if(form.class_id&&(!selectedClass||selectedClass.modality_id!==form.modality_id)){setError("A turma selecionada não corresponde à modalidade.");setSaving(false);return;}
-  const {error}=await supabase.from("students").update({full_name:form.full_name,birth_date:form.birth_date||null,phone:form.phone,email:form.email||null,enrollment_date:form.enrollment_date||null,enrollment_status:form.enrollment_status,plan_name:form.plan_name||null,monthly_fee:form.monthly_fee===""?null:Number(form.monthly_fee),modality_id:form.modality_id||null,class_id:selectedClass?.id??null,class_label:selectedClass?.name??null,teacher_profile_id:selectedClass?.teacher_profile_id??null,teacher_label:selectedClass?.teacher_profile_id?(selectedClass.teacher_profile_id):null}).eq("id",id);
+  const {error}=await supabase.from("students").update({full_name:form.full_name,birth_date:form.birth_date||null,phone:form.phone,email:form.email||null,enrollment_date:form.enrollment_date||null,enrollment_status:form.enrollment_status,plan_name:form.plan_name||null,monthly_fee:form.monthly_fee===""?null:Number(form.monthly_fee),modality_id:form.modality_id||null,class_id:selectedClass?.id??null,class_label:selectedClass?.name??null,teacher_profile_id:selectedClass?.teacher_profile_id??null,teacher_label:selectedClass?.teacher_name??null}).eq("id",id);
   if(error)setError(error.message);else{setEditing(false);setNotice("Dados atualizados. O histórico de alterações foi registrado.");await load();}
   setSaving(false);
  }
@@ -81,7 +83,7 @@ export default function StudentProfilePage(){
  {([[ "full_name","Nome completo","text"],["birth_date","Data de nascimento","date"],["phone","Telefone","tel"],["email","E-mail","email"],["enrollment_date","Data da matrícula","date"],["plan_name","Plano contratado","text"],["monthly_fee","Valor contratado","number"]] as const).map(([k,l,t])=><label key={k}><span className={label}>{l}</span><input className={field} type={t} min={t==="number"?"0":undefined} step={t==="number"?"0.01":undefined} value={form[k]} onChange={e=>change(k,e.target.value)} required={k==="full_name"}/></label>)}
  <label><span className={label}>Modalidade</span><select className={field} value={form.modality_id} onChange={e=>change("modality_id",e.target.value)}><option value="">Sem modalidade</option>{modalities.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select></label>
  <label><span className={label}>Turma</span><select className={field} value={form.class_id} disabled={!form.modality_id} onChange={e=>change("class_id",e.target.value)}><option value="">Sem turma definida</option>{availableClasses.map(c=><option key={c.id} value={c.id}>{c.name}{c.schedule?" · "+c.schedule:""}</option>)}</select></label>
- <div><span className={label}>Professor responsável</span><div className={field+" min-h-[46px] text-neutral-300"}>{selectedClass?.teacher_profile_id?"Professor atribuído à turma":selectedClass?"Professor ainda não atribuído":"Definido pela turma selecionada"}</div></div>
+ <div><span className={label}>Professor responsável</span><div className={field+" min-h-[46px] text-neutral-300"}>{selectedClass?.teacher_name??(selectedClass?"Professor ainda não atribuído":"Definido pela turma selecionada")}</div></div>
  <label><span className={label}>Situação da matrícula</span><select className={field} value={form.enrollment_status} onChange={e=>change("enrollment_status",e.target.value)}><option value="active">Ativo</option><option value="pending">Pendente</option><option value="inactive">Inativo</option></select></label></div><div className="flex justify-end"><button disabled={saving} className="rounded-lg bg-purple-700 px-5 py-2 text-sm font-semibold disabled:opacity-50">{saving?"Salvando...":"Salvar alterações"}</button></div></form>:<div className="grid gap-4 md:grid-cols-2">
  <article className={card}><h3 className="mb-4 font-semibold">Dados pessoais</h3><dl className="space-y-3 text-sm"><div><dt className={label}>Nome completo</dt><dd>{student.full_name}</dd></div><div><dt className={label}>Nascimento</dt><dd>{student.birth_date?date(student.birth_date+"T12:00:00"):"Não informado"}</dd></div><div><dt className={label}>Telefone</dt><dd>{student.phone||"Não informado"}</dd></div><div><dt className={label}>E-mail</dt><dd>{student.email||"Não informado"}</dd></div></dl></article>
  <article className={card}><h3 className="mb-4 font-semibold">Responsáveis</h3>{student.student_guardians?.length?student.student_guardians.map((x,i)=><div key={i} className="mb-3 text-sm"><p>{x.guardians?.full_name??"Nome não informado"}</p><p className="text-neutral-400">{x.guardians?.phone??"Telefone não informado"}</p></div>):<p className="text-sm text-neutral-500">Nenhum responsável vinculado.</p>}</article>
