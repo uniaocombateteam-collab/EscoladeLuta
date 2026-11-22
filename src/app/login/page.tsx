@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [busy, setBusy] = useState(false);
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault(); setBusy(true); setError("");
-    try { const { error } = await createClient().auth.signInWithPassword({ email, password }); if (error) throw error; router.replace("/"); router.refresh(); }
+    try { const db = createClient(); const { error } = await db.auth.signInWithPassword({ email, password }); if (error) throw error; const { data: { user } } = await db.auth.getUser(); const { data: profile } = await db.from("profiles").select("role").eq("id", user?.id ?? "").maybeSingle(); router.replace(profile?.role === "guardian" ? "/portal" : "/"); router.refresh(); }
     catch (e) { setError(e instanceof Error ? e.message : "Falha no login."); }
     finally { setBusy(false); }
   }
