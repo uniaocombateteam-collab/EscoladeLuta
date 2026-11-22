@@ -98,7 +98,7 @@ export default function StudentPortalPage(){
    </section>
    <section id="agenda" className="scroll-mt-24">
     <div className="mb-5"><p className="text-xs font-black tracking-[.25em] text-[#FFD200]">PROGRAME-SE</p><h2 className="mt-2 text-3xl font-black">Horários das aulas</h2><p className="mt-2 text-sm text-neutral-400">Consulte a grade disponível da academia.</p></div>
-    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{slots.slice(0,9).map(s=><article key={s.id} className="rounded-xl border border-white/10 bg-[#111] p-4"><div className="flex items-center justify-between"><span className="text-xs font-bold text-[#FFD200]">{days[s.weekday]||"Aula"}</span><span className="text-xs text-neutral-500">{s.start_time.slice(0,5)}–{s.end_time.slice(0,5)}</span></div><h3 className="mt-2 font-bold">{s.title}</h3><p className="mt-1 text-xs text-neutral-400">{s.modality_name}{s.location?" · "+s.location:""}</p></article>)}
+    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{slots.map(s=><article key={s.id} className="rounded-xl border border-white/10 bg-[#111] p-4"><div className="flex items-center justify-between"><span className="text-xs font-bold text-[#FFD200]">{days[s.weekday]||"Aula"}</span><span className="text-xs text-neutral-500">{s.start_time.slice(0,5)}–{s.end_time.slice(0,5)}</span></div><h3 className="mt-2 font-bold">{s.title}</h3><p className="mt-1 text-xs text-neutral-400">{s.modality_name}{s.location?" · "+s.location:""}</p></article>)}
      {slots.length===0&&<p className="rounded-xl border border-white/10 p-5 text-sm text-neutral-400">A grade de horários será exibida aqui quando publicada pela academia.</p>}</div>
    </section>
    <section id="minha-area" className="scroll-mt-24">
