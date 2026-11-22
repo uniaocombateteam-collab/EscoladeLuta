@@ -49,7 +49,49 @@ export default function PortalPage(){
    <section className="rounded-3xl border border-[#FFD200]/20 bg-[radial-gradient(ellipse_at_80%_20%,rgba(255,210,0,.12),transparent_45%),#111] p-7"><p className="text-xs font-bold uppercase tracking-[.2em] text-[#FFD200]">Escola de Lutas Rafael Mota</p><h2 className="mt-3 text-3xl font-black">Olá, {name.split(" ")[0]}.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-400">Acompanhe os dados dos alunos vinculados à sua responsabilidade, consulte informações de matrícula e visualize os lançamentos financeiros.</p></section>
    {error&&<p role="alert" className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-200">{error}</p>}
    <section><div className="mb-4"><p className="text-xs font-bold tracking-[.2em] text-[#FFD200]">ACOMPANHAMENTO</p><h3 className="mt-1 text-2xl font-bold">Alunos vinculados</h3></div>
-    {loading?<p className="rounded-xl border border-white/10 bg-[#111] p-6 text-sm text-neutral-400">Carregando informações...</p>:students.length===0?<p className="rounded-xl border border-white/10 bg-[#111] p-6 text-sm text-neutral-400">Nenhum aluno vinculado a este acesso.</p>:<div className="grid gap-4 md:grid-cols-2">{students.map(s=><article key={s.id} className="overflow-hidden rounded-2xl border border-white/10 bg-[#111]"><div className="relative h-36 bg-[linear-gradient(135deg,#252525,#0c0c0c)]">{s.modalities?.image_url&&<img src={s.modalities.image_url} alt={s.modalities.name||"Modalidade"} className="h-full w-full object-cover"/>}<div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"/><div className="absolute bottom-3 left-4"><p className="text-xs font-bold uppercase tracking-wider text-[#FFD200]">Modalidade</p><p className="text-xl font-black">{s.modalities?.name||"Modalidade não definida"}</p></div></div><div className="p-5"><div className="flex items-start justify-between gap-3"><div><h4 className="text-lg font-bold">{s.full_name}</h4><p className="mt-1 text-xs text-neutral-500">{s.class_label||"Turma a definir"}</p></div><span className={s.enrollment_status==="active"?"rounded-full bg-emerald-500/10 px-3 py-1 text-xs text-emerald-300":"rounded-full bg-amber-500/10 px-3 py-1 text-xs text-amber-200"}>{s.enrollment_status==="active"?"Ativo":s.enrollment_status==="pending"?"Pendente":"Inativo"}</span></div><div className="mt-5 grid grid-cols-2 gap-3 border-t border-white/10 pt-4"><div><p className="text-xs text-neutral-500">Plano</p><p className="mt-1 text-sm font-semibold">{s.plan_name||"—"}</p></div><div><p className="text-xs text-neutral-500">Mensalidade</p><p className="mt-1 text-sm font-semibold">{s.monthly_fee===null?"—":money(Number(s.monthly_fee))}</p></div></div></article>)}</div>}
+    {loading ? (
+     <p className="rounded-xl border border-white/10 bg-[#111] p-6 text-sm text-neutral-400">Carregando informações...</p>
+    ) : students.length === 0 ? (
+     <p className="rounded-xl border border-white/10 bg-[#111] p-6 text-sm text-neutral-400">Nenhum aluno vinculado a este acesso.</p>
+    ) : (
+     <div className="grid gap-4 md:grid-cols-2">
+      {students.map((s) => (
+       <article key={s.id} className="overflow-hidden rounded-2xl border border-white/10 bg-[#111]">
+        <div className="relative h-36 bg-[linear-gradient(135deg,#252525,#0c0c0c)]">
+         {s.modalities?.image_url && (
+          <img src={s.modalities.image_url} alt={s.modalities.name || "Modalidade"} className="h-full w-full object-cover" />
+         )}
+         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+         <div className="absolute bottom-3 left-4">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#FFD200]">Modalidade</p>
+          <p className="text-xl font-black">{s.modalities?.name || "Modalidade não definida"}</p>
+         </div>
+        </div>
+        <div className="p-5">
+         <div className="flex items-start justify-between gap-3">
+          <div>
+           <h4 className="text-lg font-bold">{s.full_name}</h4>
+           <p className="mt-1 text-xs text-neutral-500">{s.class_label || "Turma a definir"}</p>
+          </div>
+          <span className={s.enrollment_status === "active" ? "rounded-full bg-emerald-500/10 px-3 py-1 text-xs text-emerald-300" : "rounded-full bg-amber-500/10 px-3 py-1 text-xs text-amber-200"}>
+           {s.enrollment_status === "active" ? "Ativo" : s.enrollment_status === "pending" ? "Pendente" : "Inativo"}
+          </span>
+         </div>
+         <div className="mt-5 grid grid-cols-2 gap-3 border-t border-white/10 pt-4">
+          <div>
+           <p className="text-xs text-neutral-500">Plano</p>
+           <p className="mt-1 text-sm font-semibold">{s.plan_name || "—"}</p>
+          </div>
+          <div>
+           <p className="text-xs text-neutral-500">Mensalidade</p>
+           <p className="mt-1 text-sm font-semibold">{s.monthly_fee === null ? "—" : money(Number(s.monthly_fee))}</p>
+          </div>
+         </div>
+        </div>
+       </article>
+      ))}
+     </div>
+    )}
    </section>
    <section><div className="mb-4"><p className="text-xs font-bold tracking-[.2em] text-[#FFD200]">FINANCEIRO</p><h3 className="mt-1 text-2xl font-bold">Resumo de mensalidades</h3></div><div className="grid gap-3 sm:grid-cols-2"><article className="rounded-xl border border-white/10 bg-[#111] p-5"><p className="text-sm text-neutral-400">Em aberto</p><p className="mt-2 text-2xl font-bold text-amber-200">{loading?"—":money(pending)}</p></article><article className="rounded-xl border border-white/10 bg-[#111] p-5"><p className="text-sm text-neutral-400">Pagamentos registrados</p><p className="mt-2 text-2xl font-bold text-emerald-300">{loading?"—":money(paid)}</p></article></div>
     <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-[#111]"><div className="border-b border-white/10 p-4"><h4 className="font-semibold">Lançamentos</h4></div>{entries.length===0?<p className="p-5 text-sm text-neutral-500">Não há lançamentos financeiros para exibir.</p>:<div className="divide-y divide-white/5">{entries.map(e=><div key={e.id} className="flex flex-wrap items-center justify-between gap-3 p-4"><div><p className="text-sm font-medium">{e.description}</p><p className="mt-1 text-xs text-neutral-500">Vencimento: {date(e.due_date)}</p></div><div className="text-right"><p className="font-semibold">{money(Number(e.amount))}</p><p className={e.status==="paid"?"text-xs text-emerald-300":"text-xs text-amber-200"}>{e.status==="paid"?"Pago":e.status==="pending"?"Em aberto":"Cancelado"}</p></div></div>)}</div>}</div>
