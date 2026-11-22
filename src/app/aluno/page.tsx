@@ -8,7 +8,7 @@ type Student = {
  id:string; full_name:string; enrollment_status:string; plan_name:string|null;
  monthly_fee:number|null; class_label:string|null; class_id:string|null;
  modality_id:string|null; profile_id:string|null;
- modalities:{name:string;image_url:string|null}|null;
+ modalities:{name:string;image_url:string|null}[]|null;
 };
 type Slot = {id:string;title:string;modality_name:string;weekday:number;start_time:string;end_time:string;location:string|null;class_id:string|null};
 type Exception = {id:string;slot_id:string;exception_date:string;status:string;reason:string;note:string|null;replacement_date:string|null;replacement_start_time:string|null;replacement_end_time:string|null};
@@ -107,7 +107,7 @@ export default function StudentPortalPage(){
       <p className="text-xs font-black uppercase tracking-[.22em] text-[#FFD200]">Seu espaço na academia</p>
       <h2 className="mt-3 text-3xl font-black md:text-5xl">Olá, {student?.full_name.split(" ")[0]||"atleta"}.</h2>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-300">Aqui você acompanha sua rotina, frequência, informações financeiras e comunicados da Escola de Lutas Rafael Mota.</p>
-      <div className="mt-5 flex flex-wrap gap-2"><span className="rounded-full border border-white/15 bg-black/20 px-3 py-1.5 text-xs text-neutral-200">{student?.modalities?.name||"Modalidade a definir"}</span><span className="rounded-full border border-white/15 bg-black/20 px-3 py-1.5 text-xs text-neutral-200">{student?.class_label||"Turma a definir"}</span><span className={"rounded-full px-3 py-1.5 text-xs "+(student?.enrollment_status==="active"?"bg-emerald-500/15 text-emerald-300":"bg-amber-500/15 text-amber-200")}>{student?.enrollment_status==="active"?"Matrícula ativa":student?.enrollment_status==="pending"?"Matrícula pendente":"Verificar matrícula"}</span></div>
+      <div className="mt-5 flex flex-wrap gap-2"><span className="rounded-full border border-white/15 bg-black/20 px-3 py-1.5 text-xs text-neutral-200">{student?.modalities?.[0]?.name||"Modalidade a definir"}</span><span className="rounded-full border border-white/15 bg-black/20 px-3 py-1.5 text-xs text-neutral-200">{student?.class_label||"Turma a definir"}</span><span className={"rounded-full px-3 py-1.5 text-xs "+(student?.enrollment_status==="active"?"bg-emerald-500/15 text-emerald-300":"bg-amber-500/15 text-amber-200")}>{student?.enrollment_status==="active"?"Matrícula ativa":student?.enrollment_status==="pending"?"Matrícula pendente":"Verificar matrícula"}</span></div>
      </div>
     </article>
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
