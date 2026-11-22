@@ -5,7 +5,8 @@ import {createClient} from "@/lib/supabase/client";
 
 type Role="admin"|"teacher"|"guardian";
 type Notice={id:string;title:string;content:string;category:string;priority:"normal"|"important"|"urgent";target_roles:Role[];status:"draft"|"published"|"archived";pinned:boolean;publish_at:string|null;expires_at:string|null;created_by:string;created_at:string};
-type ReadRow={announcement_id:string;profile_id:string;read_at:string};\ntype Attachment={id:string;file_name:string;file_path:string;mime_type:string};
+type ReadRow={announcement_id:string;profile_id:string;read_at:string};
+type Attachment={id:string;file_name:string;file_path:string;mime_type:string};
 const input="w-full rounded-xl border border-white/10 bg-[#0b0b0b] px-3 py-3 text-sm text-white outline-none focus:border-[#FFD200]";
 const categories=["Todas","Geral","Administrativo","Treinamento","Eventos","Urgente","Professores"];
 const roles:Role[]=["admin","teacher","guardian"];
@@ -17,7 +18,8 @@ export default function ComunicadosPage(){
  const [role,setRole]=useState<Role|null>(null),[userId,setUserId]=useState("");
  const [rows,setRows]=useState<Notice[]>([]),[reads,setReads]=useState<ReadRow[]>([]),[readIds,setReadIds]=useState<string[]>([]);
  const [tab,setTab]=useState<"mural"|"todos"|"gerenciar"|"leituras">("mural"),[category,setCategory]=useState("Todas"),[search,setSearch]=useState("");
- const [selected,setSelected]=useState<Notice|null>(null),[editing,setEditing]=useState(false),[form,setForm]=useState(emptyForm);\n const [files,setFiles]=useState<File[]>([]),[attachments,setAttachments]=useState<Attachment[]>([]),[signedFiles,setSignedFiles]=useState<{name:string;url:string;type:string}[]>([]);
+ const [selected,setSelected]=useState<Notice|null>(null),[editing,setEditing]=useState(false),[form,setForm]=useState(emptyForm);
+ const [files,setFiles]=useState<File[]>([]),[attachments,setAttachments]=useState<Attachment[]>([]),[signedFiles,setSignedFiles]=useState<{name:string;url:string;type:string}[]>([]);
  const [loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(""),[message,setMessage]=useState("");
  const load=useCallback(async()=>{
   setLoading(true);setError("");
