@@ -15,6 +15,7 @@ type Exception = {id:string;slot_id:string;exception_date:string;status:string;r
 type Attendance = {id:string;class_date:string;status:"present"|"absent"|"justified";note:string|null};
 type Entry = {id:string;description:string;amount:number;due_date:string|null;status:string;paid_at:string|null;competence_month:string|null};
 type Announcement = {id:string;title:string;content:string;category:string;priority:"normal"|"important"|"urgent";pinned:boolean;publish_at:string|null;created_at:string};
+type Modality = {id:string;name:string;image_url:string|null};
 const money=(v:number)=>new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(v);
 const date=(v:string|null)=>v?new Date(v+"T12:00:00").toLocaleDateString("pt-BR"):"—";
 const days=["Domingo","Segunda-feira","Terça-feira","Quarta-feira","Quinta-feira","Sexta-feira","Sábado"];
@@ -24,7 +25,7 @@ const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMo
 
 export default function StudentPortalPage(){
  const db=useMemo(()=>createClient(),[]),router=useRouter();
- const [student,setStudent]=useState<Student|null>(null),[slots,setSlots]=useState<Slot[]>([]);
+ const [student,setStudent]=useState<Student|null>(null),[slots,setSlots]=useState<Slot[]>([]),[modalities,setModalities]=useState<Modality[]>([]);
  const [exceptions,setExceptions]=useState<Exception[]>([]),[attendance,setAttendance]=useState<Attendance[]>([]);
  const [entries,setEntries]=useState<Entry[]>([]),[announcements,setAnnouncements]=useState<Announcement[]>([]);
  const [readIds,setReadIds]=useState<string[]>([]),[selectedAnnouncement,setSelectedAnnouncement]=useState<Announcement|null>(null);
@@ -42,7 +43,7 @@ export default function StudentPortalPage(){
   if(sError){setError("Não foi possível carregar sua matrícula: "+sError.message);setLoading(false);return;}
   if(!s){setError("Sua conta ainda não está vinculada a uma matrícula. Procure a administração.");setLoading(false);return;}
   const current:Student={...s,modalities:Array.isArray(s.modalities)?s.modalities:s.modalities?[s.modalities]:null};setStudent(current);
-  const [schedule,finance,attendanceRows,noticeRows,readRows]=await Promise.all([
+  const [schedule,finance,attendanceRows,noticeRows,readRows,modalityRows]=await Promise.all([
    current.class_id
     ? db.from("academy_schedule_slots").select("id,title,modality_name,weekday,start_time,end_time,location,class_id").eq("active",true).eq("class_id",current.class_id).order("weekday").order("start_time")
     : current.modality_id
@@ -51,13 +52,15 @@ export default function StudentPortalPage(){
    db.from("financial_entries").select("id,description,amount,due_date,status,paid_at,competence_month").eq("student_id",current.id).eq("direction","income").order("due_date",{ascending:false}).limit(100),
    db.from("student_attendance").select("id,class_date,status,note").eq("student_id",current.id).order("class_date",{ascending:false}).limit(500),
    db.from("academy_announcements").select("id,title,content,category,priority,pinned,publish_at,created_at").eq("status","published").order("pinned",{ascending:false}).order("publish_at",{ascending:false,nullsFirst:false}).limit(50),
-   db.from("academy_announcement_reads").select("announcement_id").eq("profile_id",user.id)
+   db.from("academy_announcement_reads").select("announcement_id").eq("profile_id",user.id),
+   db.from("modalities").select("id,name,image_url").eq("active",true).order("name")
   ]);
   if(schedule.error)setError("Não foi possível carregar sua grade de aulas: "+schedule.error.message);else setSlots((schedule.data??[]) as Slot[]);
   if(finance.error)setError("Não foi possível carregar seu financeiro: "+finance.error.message);else setEntries((finance.data??[]) as Entry[]);
   if(attendanceRows.error)setError("Não foi possível carregar seu histórico de frequência: "+attendanceRows.error.message);else setAttendance((attendanceRows.data??[]) as Attendance[]);
   if(noticeRows.error)setError("Não foi possível carregar os comunicados: "+noticeRows.error.message);else setAnnouncements((noticeRows.data??[]) as Announcement[]);
   if(readRows.error)setError("Não foi possível carregar as leituras dos comunicados: "+readRows.error.message);else setReadIds((readRows.data??[]).map((r:any)=>r.announcement_id));
+  if(modalityRows.error)setError("Não foi possível carregar as modalidades: "+modalityRows.error.message);else setModalities((modalityRows.data??[]) as Modality[]);
   const slotIds=(schedule.data??[]).map((x:any)=>x.id);
   if(slotIds.length){
    const from=todayISO(),to=new Date(Date.now()+45*86400000).toISOString().slice(0,10);
@@ -110,6 +113,19 @@ export default function StudentPortalPage(){
       <div className="mt-5 flex flex-wrap gap-2"><span className="rounded-full border border-white/15 bg-black/20 px-3 py-1.5 text-xs text-neutral-200">{student?.modalities?.[0]?.name||"Modalidade a definir"}</span><span className="rounded-full border border-white/15 bg-black/20 px-3 py-1.5 text-xs text-neutral-200">{student?.class_label||"Turma a definir"}</span><span className={"rounded-full px-3 py-1.5 text-xs "+(student?.enrollment_status==="active"?"bg-emerald-500/15 text-emerald-300":"bg-amber-500/15 text-amber-200")}>{student?.enrollment_status==="active"?"Matrícula ativa":student?.enrollment_status==="pending"?"Matrícula pendente":"Verificar matrícula"}</span></div>
      </div>
     </article>
+    <section className="space-y-3" aria-labelledby="modalidades-title">
+     <div className="flex items-end justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[.2em] text-[#FFD200]">Explore a academia</p><h3 id="modalidades-title" className="mt-1 text-xl font-black md:text-2xl">Conheça nossas modalidades</h3><p className="mt-1 text-sm text-neutral-400">Descubra outras atividades oferecidas pela Escola de Lutas Rafael Mota.</p></div><span className="hidden text-xs text-neutral-500 sm:block">{modalities.length} {modalities.length===1?"modalidade":"modalidades"}</span></div>
+     {modalities.length>0?<div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
+      {modalities.map((modality,index)=><article key={modality.id} className="min-w-[78%] snap-start overflow-hidden rounded-2xl border border-white/10 bg-[#111] transition hover:border-[#FFD200]/40 sm:min-w-0">
+       <div className="relative h-36 overflow-hidden bg-gradient-to-br from-[#292929] to-[#090909] sm:h-40">
+        {modality.image_url?<img src={modality.image_url} alt={`Aula de ${modality.name}`} loading="lazy" className="h-full w-full object-cover"/>:<div className="flex h-full items-center justify-center"><span className="text-5xl font-black text-[#FFD200]/70">{String(index+1).padStart(2,"0")}</span></div>}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent"/>
+        <span className="absolute bottom-3 left-4 text-xs font-bold uppercase tracking-[.18em] text-[#FFD200]">Modalidade {String(index+1).padStart(2,"0")}</span>
+       </div>
+       <div className="p-4"><h4 className="text-lg font-bold">{modality.name}</h4><p className="mt-1 text-xs leading-5 text-neutral-400">Conheça esta modalidade e consulte a administração sobre horários, turmas e condições de matrícula.</p></div>
+      </article>)}
+     </div>:<p className="rounded-2xl border border-white/10 bg-[#111] p-5 text-sm text-neutral-400">Não há modalidades disponíveis no momento.</p>}
+    </section>
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
      <article className="rounded-2xl border border-white/10 bg-[#111] p-4"><p className="text-xs text-neutral-400">Aulas neste mês</p><p className="mt-2 text-3xl font-black">{loading?"—":monthAttendance}</p><p className="mt-1 text-[11px] text-neutral-500">Registros de frequência</p></article>
      <article className="rounded-2xl border border-white/10 bg-[#111] p-4"><p className="text-xs text-neutral-400">Presença acumulada</p><p className="mt-2 text-3xl font-black text-emerald-300">{loading?"—":attendanceRate+"%"}</p><p className="mt-1 text-[11px] text-neutral-500">{present} presença(s) registrada(s)</p></article>
